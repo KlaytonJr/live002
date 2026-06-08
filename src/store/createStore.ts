@@ -1,10 +1,12 @@
+import { useEffect, useState, useSyncExternalStore } from 'react';
+
 type SetterFn<TState> = (prevState: TState) => Partial<TState>;
 type SetStateFn<TState> = (
   partialState: Partial<TState> | SetterFn<TState>,
 ) => void;
 
 export function createStore<TState extends Record<string, any>>(
-  createState: (setState: SetStateFn<TState>) => TState,
+  createState: (setState: SetStateFn<TState>, getState: () => TState) => TState,
 ) {
   let state: TState;
   let listeners: Set<() => void>;
@@ -40,8 +42,29 @@ export function createStore<TState extends Record<string, any>>(
     return state;
   }
 
-  state = createState(setState);
+  // function useStore<TValue>(selector: (currentState: TState) => TValue) {
+  //   const [value, setValue] = useState(() => selector(state));
+
+  //   useEffect(() => {
+  //     const unsubscribe = subscribe(() => {
+  //       const newValue = selector(state);
+
+  //       if (value !== newValue) {
+  //         setValue(newValue);
+  //       }
+  //     });
+
+  //     return () => unsubscribe();
+  //   }, [selector, value]);
+
+  //   return value;
+  // }
+  function useStore<TValue>(selector: (currentState: TState) => TValue) {
+    return useSyncExternalStore(subscribe, () => selector(state));
+  }
+
+  state = createState(setState, getState);
   listeners = new Set();
 
-  return { setState, getState, subscribe };
+  return useStore;
 }
