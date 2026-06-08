@@ -11,9 +11,9 @@ import { IUser } from '../entities/IUser';
 
 interface IGlobalContextValue {
   user: IUser | null;
+  todos: ITodo[];
   login(): void;
   logout(): void;
-  todos: ITodo[];
   addTodo(title: string, author?: string): void;
   toggleTodoDone(todoId: number): void;
   removeTodo(todoId: number): void;
